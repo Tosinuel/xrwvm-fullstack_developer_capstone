@@ -8,16 +8,23 @@ sentiment_analyzer_url = getattr(settings, 'sentiment_analyzer_url', '')
 def get_request(endpoint, **kwargs):
     params = ""
     if kwargs:
+        param_list = []
         for key, value in kwargs.items():
-            params = params + key + "=" + value + "&"
+            param_list.append(key + "=" + value)
+        params = "&".join(param_list) + "&"
 
-    request_url = backend_url + endpoint + "?" + params
+    # Build URL properly - only add "?" if there are params
+    if params:
+        request_url = backend_url + endpoint + "?" + params
+    else:
+        request_url = backend_url + endpoint
+
     print("GET from {}".format(request_url))
     try:
         response = requests.get(request_url)
         return response.json()
-    except Exception:
-        print("Network exception occurred")
+    except Exception as e:
+        print(f"Network exception occurred: {e}")
         return None
 
 
@@ -26,8 +33,8 @@ def analyze_review_sentiments(text):
     try:
         response = requests.get(request_url)
         return response.json()
-    except Exception:
-        print("Network exception occurred")
+    except Exception as e:
+        print(f"Network exception occurred: {e}")
         return {"sentiment": "neutral"}
 
 
@@ -36,6 +43,6 @@ def post_review(data_dict):
     try:
         response = requests.post(request_url, json=data_dict)
         return response.json()
-    except Exception:
-        print("Network exception occurred")
+    except Exception as e:
+        print(f"Network exception occurred: {e}")
         return None
