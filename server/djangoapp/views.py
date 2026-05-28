@@ -43,9 +43,22 @@ def get_cars(request):
 @csrf_exempt
 def login_user(request):
     """Authenticate and log in a user."""
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
+    # Debug: log the request body
+    logger.info(f"Request body: {request.body}")
+    logger.info(f"Content-Type: {request.content_type}")
+    
+    # Handle empty or malformed body
+    if not request.body:
+        return JsonResponse({"error": "Empty request body"}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}, body: {request.body}")
+        return JsonResponse({"error": str(e)}, status=400)
+    
+    username = data.get('userName', '')
+    password = data.get('password', '')
 
     user = authenticate(username=username, password=password)
 
