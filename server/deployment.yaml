@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dealership
+  name: dealership
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dealership
+  template:
+    metadata:
+      labels:
+        app: dealership
+    spec:
+      hostNetwork: true
+      containers:
+      - image: us.icr.io/sn-labs-olatunjioluw/dealership:latest
+        imagePullPolicy: Always
+        name: dealership
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        env:
+        - name: BACKEND_URL
+          value: "http://localhost:3030"
+        - name: SENTIMENT_ANALYZER_URL
+          value: "https://sentianalyzer.2ag3vedghvqu.us-south.codeengine.appdomain.cloud/"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dealership
+  name: dealership-service
+spec:
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: dealership
+  type: ClusterIP
